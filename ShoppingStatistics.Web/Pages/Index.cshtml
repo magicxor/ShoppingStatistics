@@ -1,0 +1,38 @@
+﻿@page "/"
+
+@using ShoppingStatistics.Web.Services
+
+@inject IFileReaderService fileReaderService;
+@inject DataProcessor _dataProcessor;
+
+@functions {
+    IFileReaderRef Reader;
+
+    protected override void OnInit()
+    {
+        Reader = fileReaderService.CreateReference();
+        base.OnInit();
+    }
+
+    protected async Task ExecuteFileProcessingAsync()
+    {
+        foreach (var file in await Reader.EnumerateFilesAsync())
+        {
+            await _dataProcessor.ProcessFileAsync(this.StateHasChanged, file);
+            break;
+        }
+    }
+}
+
+<div id="container" class="container-fluid">
+    <hr />
+    <div class="row">
+        <div class="mx-auto">
+            <div class="form-group">
+                <FileReader ReaderRef="@Reader" />
+            </div>
+            <button onclick="@ExecuteFileProcessingAsync" class="btn btn-primary">Read file</button>
+        </div>
+    </div>
+    <hr />
+</div>
